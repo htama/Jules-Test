@@ -41,3 +41,29 @@ h1 {
     font-weight: bold; /* 文字の太さ */
     color: #e74c3c; /* 文字色 */
 }
+
+/* 次のテトリミノ表示コンテナのスタイル */
+#next-tetromino-container {
+    margin-left: 20px; /* 左側の余白 (スコアコンテナと同様) */
+    padding: 10px; /* 内側の余白 */
+    border: 1px solid #ccc; /* 枠線 */
+    background-color: #fff; /* 背景色 */
+    width: 100px; /* 幅 (canvasの幅に合わせて調整) */
+    text-align: center; /* 文字を中央揃え */
+    display: flex; /* フレックスボックスを使用 */
+    flex-direction: column; /* 子要素を縦に並べる */
+    align-items: center; /* 子要素を中央揃え */
+}
+
+/* 次のテトリミノ表示canvasのスタイル */
+#next-tetromino-display {
+    border: 1px solid #eee; /* canvas自体の枠線 (任意) */
+    background-color: #f8f8f8; /* canvasの背景色 (任意) */
+}
+
+/* "NEXT"という見出しのスタイル調整 (任意) */
+#next-tetromino-container h2 {
+    margin-top: 0; /* 上の余白を少し調整 */
+    margin-bottom: 5px; /* 下の余白を少し調整 */
+    font-size: 1.2em; /* フォントサイズを少し調整 */
+}
