@@ -1,0 +1,43 @@
+/* ページ全体のスタイル */
+body {
+    font-family: sans-serif; /* フォントの種類 */
+    display: flex; /* フレックスボックスレイアウトを使用 */
+    flex-direction: column; /* 子要素を縦方向に配置 */
+    align-items: center; /* 子要素を中央揃え（横方向） */
+    background-color: #f0f0f0; /* 背景色 */
+    margin: 0; /* 外側の余白を0に */
+}
+
+/* 見出しh1のスタイル */
+h1 {
+    color: #333; /* 文字色 */
+}
+
+/* ゲームコンテナ全体のスタイル */
+#game-container {
+    display: flex; /* フレックスボックスレイアウトを使用 */
+    margin-top: 20px; /* 上側の余白 */
+}
+
+/* ゲームボードのスタイル */
+#game-board {
+    border: 1px solid #ccc; /* 枠線 */
+    background-color: #fff; /* 背景色 */
+}
+
+/* スコアコンテナのスタイル */
+#score-container {
+    margin-left: 20px; /* 左側の余白 */
+    padding: 10px; /* 内側の余白 */
+    border: 1px solid #ccc; /* 枠線 */
+    background-color: #fff; /* 背景色 */
+    width: 150px; /* 幅 */
+    text-align: center; /* 文字を中央揃え */
+}
+
+/* スコア表示部分のスタイル */
+#score {
+    font-size: 2em; /* フォントサイズ */
+    font-weight: bold; /* 文字の太さ */
+    color: #e74c3c; /* 文字色 */
+}
