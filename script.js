@@ -2,6 +2,9 @@
 const canvas = document.getElementById('game-board'); // ゲームボードのcanvas要素
 const context = canvas.getContext('2d'); // 2D描画コンテキスト
 const scoreElement = document.getElementById('score'); // スコア表示用のHTML要素
+const nextTetrominoCanvas = document.getElementById('next-tetromino-display');
+const nextTetrominoContext = nextTetrominoCanvas.getContext('2d');
+const NEXT_BLOCK_SIZE = 15; // NEXT表示用のブロックサイズ
 
 // ゲーム設定に関する定数
 const ROWS = 20; // ゲームボードの行数
@@ -56,16 +59,29 @@ const TETROMINOES = [
 let currentTetromino; // 現在のテトリミノオブジェクト {shape, color}
 let currentX;         // 現在のテトリミノのX座標 (ボード上の列インデックス)
 let currentY;         // 現在のテトリミノのY座標 (ボード上の行インデックス)
+let nextTetromino; // 次に出現するテトリミノ
 
 /**
- * 新しいテトリミノをランダムに選択し、ボードの上部中央に配置する関数。
+ * テトリミノをランダムに選択して返すヘルパー関数。
+ */
+function getRandomTetromino() {
+    const rand = Math.floor(Math.random() * TETROMINOES.length);
+    // 新しいオブジェクトとして返すことで、元のTETROMINOES定義が変更されるのを防ぐ (shapeの回転などで影響が出ないように)
+    const tetromino = TETROMINOES[rand];
+    return { shape: tetromino.shape.map(row => row.slice()), color: tetromino.color };
+}
+
+/**
+ * currentTetromino に nextTetromino をセットし、新しい nextTetromino を準備する。
+ * ボードの上部中央に currentTetromino を配置する。
  */
 function newTetromino() {
-    const rand = Math.floor(Math.random() * TETROMINOES.length); // ランダムなインデックスを生成
-    currentTetromino = TETROMINOES[rand]; // ランダムにテトリミノを選択
+    currentTetromino = nextTetromino; // nextTetrominoを現在のテトリミノに設定
     // ボードの中央上部に配置するようにX座標を計算
     currentX = Math.floor(COLS / 2) - Math.floor(currentTetromino.shape[0].length / 2);
     currentY = 0; // Y座標は最上段(0)に設定
+
+    nextTetromino = getRandomTetromino(); // 次のテトリミノをランダムに準備
 }
 
 
@@ -125,6 +141,49 @@ function drawTetromino() {
 }
 
 /**
+ * 次にくるテトリミノを専用のcanvasに描画する関数。
+ */
+function drawNextTetromino() {
+    if (!nextTetromino) return; // 次のテトリミノがなければ何もしない
+
+    // canvasをクリア
+    nextTetrominoContext.clearRect(0, 0, nextTetrominoCanvas.width, nextTetrominoCanvas.height);
+
+    nextTetrominoContext.fillStyle = nextTetromino.color; // テトリミノの色を設定
+    nextTetrominoContext.strokeStyle = '#333'; // テトリミノの各ブロックの境界線の色
+
+    const shape = nextTetromino.shape;
+    // テトリミノの形状に合わせて中央に描画するためのオフセット計算
+    // 各テトリミノの形状配列の幅と高さを取得
+    const shapeActualWidth = shape[0].length;
+    const shapeActualHeight = shape.length;
+
+    // 描画開始位置の計算 (テトリミノがcanvasの中央に来るように)
+    const startX = (nextTetrominoCanvas.width - (shapeActualWidth * NEXT_BLOCK_SIZE)) / 2;
+    const startY = (nextTetrominoCanvas.height - (shapeActualHeight * NEXT_BLOCK_SIZE)) / 2;
+
+    // テトリミノの形状 (shape配列) に基づいて各ブロックを描画
+    shape.forEach((row, yOffset) => { // shapeの各行を走査
+        row.forEach((value, xOffset) => { // shapeの各列（値）を走査
+            if (value) { // valueが1（ブロックあり）の場合
+                // ブロックを塗りつぶしで描画
+                nextTetrominoContext.fillRect(
+                    startX + xOffset * NEXT_BLOCK_SIZE,
+                    startY + yOffset * NEXT_BLOCK_SIZE,
+                    NEXT_BLOCK_SIZE, NEXT_BLOCK_SIZE
+                );
+                // ブロックの境界線を描画
+                nextTetrominoContext.strokeRect(
+                    startX + xOffset * NEXT_BLOCK_SIZE,
+                    startY + yOffset * NEXT_BLOCK_SIZE,
+                    NEXT_BLOCK_SIZE, NEXT_BLOCK_SIZE
+                );
+            }
+        });
+    });
+}
+
+/**
  * スコアを更新し、HTMLのスコア表示を更新する関数。
  * @param {number} newScore - 更新後の新しいスコア。
  */
@@ -139,6 +198,7 @@ function updateScore(newScore) {
 function draw() {
     drawBoard();     // ボード（固定ブロック）の描画
     drawTetromino(); // 操作中テトリミノの描画
+    drawNextTetromino(); // 次のテトリミノを描画
 }
 
 /**
@@ -380,17 +440,19 @@ document.addEventListener('keyup', event => {
 // ゲーム初期化処理
 updateScore(0); // スコアを0で初期表示
 
-// drawBoard();    // 初期ボードを描画（空の状態） // newTetrominoより前に描画すると最初のブロックが見えないことがあるので移動
-newTetromino(); // 最初のテトリミノを生成
+// ★★★ 初期化の順番を変更 ★★★
+nextTetromino = getRandomTetromino(); // 最初にnextTetrominoを準備
+newTetromino(); // これでcurrentTetrominoと新しいnextTetrominoが設定される
+
 drawBoard();    // 最初のテトリミノ生成後にボードを描画
 
 // 初期配置で既にゲームオーバーかどうかをチェック
-// newTetromino()を2回呼んでいたのを1回に修正。最初のnewTetromino()で生成されたものでチェック。
 if (!canMove(0,0)) {
-    gameRunning = false; // ゲーム実行フラグをオフ
+    gameRunning = false;
     draw();              // 現在の盤面（ブロックが置けない状態）を描画
     drawGameOver();      // ゲームオーバーメッセージを表示
 } else {
+    draw(); // ★★★ 初回描画を追加してNEXTミノも表示 ★★★
     gameLoop(); // ゲームオーバーでなければメインループを開始
 }
 console.log("Tetris game initialized and started.");
